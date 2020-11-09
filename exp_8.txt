@@ -1,0 +1,678 @@
+#include<stdio.h>
+#include<string.h>
+#define N 30
+typedef struct student
+{
+    long studentID;
+    char name[N];
+    float score[6];
+}STUDENT;
+void Inputrecord(STUDENT stu[], char course[][N], int *pStudent, int *pCourse);
+void AverforCourse(STUDENT stu[], char course[][N], int iStudent, int iCourse);
+void AverforStud(STUDENT stu[], char course[][N], int iStudent, int iCourse);
+void DescendingSort(STUDENT stu[], char course[][N], int rank[], float sum[], int iStudent, int iCourse);
+void AscendingSort_Score(STUDENT stu[], char course[][N], int rank[], float sum[], int iStudent, int iCourse);
+void AscendingSort_Num(STUDENT stu[], char course[][N], int rank[], float sum[], int iStudent, int iCourse);
+void DictionarySort(STUDENT stu[], char course[][N], int rank[], float sum[], int iStudent, int iCourse);
+void Search_Num(STUDENT stu[], char course[][N], int rank[], float sum[], int iStudent, int iCourse);
+void Search_Name(STUDENT stu[], char course[][N], int rank[], float sum[], int iStudent, int iCourse);
+void Classify(STUDENT stu[], char course[][N], int rank[], float sum[], int iStudent, int iCourse);
+void PrintScore(STUDENT stu[], char course[][N], int rank[], float sum[], int iStudent, int iCourse);
+void Rank(STUDENT stu[], char course[][N], int rank[], float sum[], int iStudent, int iCourse);
+void Swap_STU(STUDENT *x, STUDENT *y);
+
+int main()
+{
+    int iChoice = 0, iStudent = 0, sign = 0, iCourse = 0, i = 0;
+    int rank[N];
+    int *pStudent = &iStudent;
+    int *pCourse = &iCourse;
+    STUDENT stu[N];
+    char course[6][N];
+    float sum[N];
+
+    for(i = 0; i < N; i++)    //初始化总分
+    {
+        sum[i] = 0;
+    }
+
+    printf("1.Input record\n");                    //输出菜单
+    printf("2.Calculate total and average score of every course\n");
+    printf("3.Calculate total and average score of every student\n");
+    printf("4.Sort in descending order by total score of every student\n");
+    printf("5.Sort in ascending order by total score of every student\n");
+    printf("6.Sort in ascending order by number\n");
+    printf("7.Sort in dictionary order by name\n");
+    printf("8.Search by number\n");
+    printf("9.Search by name\n");
+    printf("10.Statistic analysis for every course\n");
+    printf("11.List record\n");
+    printf("0.Exit\n");
+    printf("Please enter your choice:\n");
+
+    do{
+        do{
+            sign = scanf("%d",&iChoice);     //录入用户选择
+            if(sign != 1 || iChoice > 11 || iChoice < 0 || getchar() != '\n')    //防止出现错误输入
+            {
+                while(getchar() != '\n');
+                printf("请输入正确的命令（0-11）:\n");
+                sign = 0;
+            }
+        }while(sign != 1);
+
+        switch(iChoice)         //依据用户选择实现不同功能
+        {
+            case 1:
+                Inputrecord(stu, course, pStudent, pCourse);
+                break;
+            case 2:
+                AverforCourse(stu, course, iStudent, iCourse);
+                break;
+            case 3:
+                AverforStud(stu, course, iStudent, iCourse);
+                break;
+            case 4:
+                DescendingSort(stu, course, rank, sum, iStudent, iCourse);
+                break;
+            case 5:
+                AscendingSort_Score(stu, course, rank, sum, iStudent, iCourse);
+                break;
+            case 6:
+                AscendingSort_Num(stu, course, rank, sum, iStudent, iCourse);
+                break;
+            case 7:
+                DictionarySort(stu, course, rank, sum, iStudent, iCourse);
+                break;
+            case 8:
+                Search_Num(stu, course, rank, sum, iStudent, iCourse);
+                break;
+            case 9:
+                Search_Name(stu, course, rank, sum, iStudent, iCourse);
+                break;
+            case 10:
+                Classify(stu, course, rank, sum, iStudent, iCourse);
+                break;
+            case 11:
+                PrintScore(stu, course, rank, sum, iStudent, iCourse);
+                break;
+            case 0:
+                return 0;       //输入0，则结束程序
+        }
+        printf("Please enter your choice:\n");
+    }while(1);      //不断循环，直至用户手动结束
+}
+
+/**********************
+**函数名： InputRecord
+**输入： STUDENT stu[], char course[][N], int *pStudent, int *pCourse
+**stu[] --- 记录学生数据的结构体
+** *pStudent --- 指向记录输入数据个数的整型变量iStudent的整形指针
+** *pCourse --- 指向记录课程数的整型变量iCourse的整形指针
+**course[][N] --- 记录课程名字的字符型二维数组
+**功能描述： 录入学生的学号，姓名和各科考试成绩
+**********************/
+void Inputrecord(STUDENT stu[], char course[][N], int *pStudent, int *pCourse)
+{
+    int i = 0, j = 0;
+    int sign1 = 0, sign2 = 0, sign0 = 0;
+    int flag1 = 0, flag2 = 0, flag0 = 0;
+
+    printf("请输入参与考试的人数：\n");
+    do{                                 //防止错误输入
+        flag0 = 1;
+        sign0 = scanf("%d", pStudent);
+        if(sign0 != 1 || *pStudent < 0 || *pStudent > N || getchar() != '\n')
+        {
+            while(getchar() != '\n');
+            printf("请正确输入考试人数：\n");
+            flag0 = 0;
+        }
+    }while(sign0 != 1 || *pStudent > N || *pStudent < 0 || flag0 !=1);
+
+    printf("请输入参与考试科目数：\n");
+    do{                                 //防止错误输入
+        flag0 = 1;
+        sign0 = scanf("%d", pCourse);
+        if(sign0 != 1 || *pCourse < 0 || *pCourse > 6 || getchar() != '\n')
+        {
+            while(getchar() != '\n');
+            printf("请正确输入考试科目数：\n");
+            flag0 = 0;
+        }
+    }while(sign0 != 1 || *pCourse > 6 || *pCourse< 0 || flag0 !=1);
+
+    for(i = 0; i < *pCourse; i++)
+    {
+        if (i == 0)
+            printf("请输入课程名字:\n");
+        else
+            printf("请输入下一门课程的名字：\n");
+
+        gets(course[i]);
+    }
+
+    for(i = 0;i < *pStudent; i++)
+    {
+        if(i ==0 )
+            printf("请输入学生的学号（数字）：\n");
+        else
+            printf("请输入下一个学生的学号（数字）：\n");
+        do{
+            flag1 = 1;
+            sign1 = scanf("%ld", &stu[i].studentID);
+
+            if(sign1 != 1 || getchar() != '\n')   //防止错误输入
+            {
+                flag1 = 0;
+                while(getchar() != '\n');     //清空缓存区
+                printf("请输入正确的学号（数字）:\n");
+            }
+        }while(sign1 != 1 || flag1 != 1);
+
+        printf("请输入%ld号学生的姓名：\n", stu[i].studentID);
+
+        gets(stu[i].name);
+                          //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        fflush(stdin);
+
+        for(j = 0; j < *pCourse; j++)
+        {
+            printf("请输入他的成绩---%s\n", course[j]);
+
+            do{
+                flag2 = 1;
+                sign2 = scanf("%f", &stu[i].score[j]);
+
+                if(sign2 != 1 || getchar() != '\n' || stu[i].score[j] > 100)   //防止错误输入
+                {
+                    flag2 = 0;
+                    while(getchar() != '\n');     //清空缓存区
+                    printf("请输入正确的考试成绩:\n");
+                }
+            }while(sign2 != 1 || stu[i].score[j] > 100 || flag2 != 1);
+        }
+    }
+}
+
+/**********************
+**函数名： AverforCourse
+**输入： STUDENT stu[], char course[][N], int *pStudent, int *pCourse
+**stu[] --- 记录学生数据的结构体
+**iStudent --- 记录输入数据个数的整型变量
+**iCourse --- 记录课程数的整型变量iCourse
+**course[][N] --- 记录课程名字的字符型二维数组
+**功能描述： 计算每门课程的总分和平均分
+**********************/
+void AverforCourse(STUDENT stu[], char course[][N], int iStudent, int iCourse)
+{
+    int i = 0, j =0;
+    double sum = 0, average = 0;
+
+    if(iStudent == 0 || iCourse == 0)
+    {
+        printf("请先录入学生数据\n");
+        return;
+    }
+
+    for(i = 0; i < iCourse; i++)
+    {
+        sum = 0;
+
+        for(j = 0; j < iStudent; j++)
+        {
+            sum += stu[j].score[i];
+        }
+
+        average = sum / iStudent;
+
+        printf("%s\n总分：%.2lf，平均分：%.2lf\n", course[i], sum, average);
+    }
+}
+
+/**********************
+**函数名： AverforStu
+**输入： STUDENT stu[], char course[][N], int *pStudent, int *pCourse
+**stu[] --- 记录学生数据的结构体
+**iStudent --- 记录输入数据个数的整型变量
+**iCourse --- 记录课程数的整型变量iCourse
+**course[][N] --- 记录课程名字的字符型二维数组
+**功能描述： 计算每位学生的总分和平均分
+**********************/
+void AverforStud(STUDENT stu[], char course[][N], int iStudent, int iCourse)
+{
+    int i = 0, j = 0;
+    double sum = 0, average = 0;
+
+    if(iStudent == 0 || iCourse == 0)
+    {
+        printf("请先录入学生数据\n");
+        return;
+    }
+
+    for(i = 0; i < iStudent; i++)
+    {
+        sum = 0;
+
+        for(j = 0; j < iCourse; j++)
+        {
+            sum += stu[i].score[j];
+        }
+
+        average = sum / iCourse;
+
+        printf("%s\n总分：%.2lf，平均分：%.2lf\n", stu[i].name, sum, average);
+    }
+}
+/**********************
+**函数名： DescendingSort
+**输入： STUDENT stu[], char course[][N], int rank[], float sum[], int *pStudent, int *pCourse
+**stu[] --- 记录学生数据的结构体
+**iStudent --- 记录输入数据个数的整型变量
+**iCourse --- 记录课程数的整型变量iCourse
+**course[][N] --- 记录课程名字的字符型二维数组
+**rank[] --- 记录排名的整型数组
+**sum[] --- 记录学生总分的单精度数组
+**功能描述： 按每个学生的总分由高到低排出名次表
+**********************/
+void DescendingSort(STUDENT stu[], char course[][N], int rank[], float sum[], int iStudent, int iCourse)
+{
+    int i = 0;
+
+    Rank(stu, course, rank, sum, iStudent, iCourse);
+
+    for(i = 0; i < iStudent; i++)
+    {
+        printf("姓名：%s，学号：%ld，总分：%.2f，排名：%d\n", stu[i].name, stu[i].studentID, sum[i], rank[i]);
+    }
+
+    for(i = 0; i < iStudent; i++)
+    {
+        sum[i] = 0;
+    }
+}
+
+/**********************
+**函数名： AscendingSort_Score
+**输入： STUDENT stu[], char course[][N], int rank[], float sum[], int *pStudent, int *pCourse
+**stu[] --- 记录学生数据的结构体
+**iStudent --- 记录输入数据个数的整型变量
+**iCourse --- 记录课程数的整型变量iCourse
+**course[][N] --- 记录课程名字的字符型二维数组
+**rank[] --- 记录排名的整型数组
+**sum[] --- 记录学生总分的单精度数组
+**功能描述：  按每个学生的总分由低到高排出名次表
+**********************/
+void AscendingSort_Score(STUDENT stu[], char course[][N], int rank[], float sum[], int iStudent, int iCourse)
+{
+    int i = 0;
+
+    Rank(stu, course, rank, sum, iStudent, iCourse);
+
+    for(i = iStudent - 1; i >= 0; i--)
+    {
+        printf("姓名：%s，学号：%ld, 总分：%.2f，名次：%d\n", stu[i].name, stu[i].studentID, sum[i], rank[i]);
+    }
+
+    for(i = 0; i < iStudent; i++)
+    {
+        sum[i] = 0;
+    }
+}
+
+/**********************
+**函数名：AscendingSort_Num
+**输入： STUDENT stu[], char course[][N], int rank[], float sum[], int *pStudent, int *pCourse
+**stu[] --- 记录学生数据的结构体
+**iStudent --- 记录输入数据个数的整型变量
+**iCourse --- 记录课程数的整型变量iCourse
+**course[][N] --- 记录课程名字的字符型二维数组
+**rank[] --- 记录排名的整型数组
+**sum[] --- 记录学生总分的单精度数组
+**功能描述：按学号由小到大排出名次表
+**********************/
+void AscendingSort_Num(STUDENT stu[], char course[][N], int rank[], float sum[], int iStudent, int iCourse)
+{
+    int i = 0, j = 0;
+    float temp = 0;
+
+    Rank(stu, course, rank, sum, iStudent, iCourse);
+
+    for(i = 0; i < iStudent - 1; i++)
+    {
+        for(j = i+1; j < iStudent; j++)
+        {
+            if(stu[i].studentID > stu[j].studentID)
+            {
+                Swap_STU(&stu[i], &stu[j]);
+
+                temp = rank[i];
+                rank[i] = rank[j];
+                rank[j] = temp;
+
+                temp = sum[i];
+                sum[i] = sum[j];
+                sum[j] = temp;
+            }
+        }
+    }
+
+    for(i = 0; i < iStudent; i++)
+    {
+        printf("姓名：%s，学号：%ld, 总分：%.2f，名次：%d\n", stu[i].name, stu[i].studentID, sum[i], rank[i]);
+    }
+
+    for(i = 0; i < iStudent; i++)
+    {
+        sum[i] = 0;
+    }
+}
+
+/**********************
+**函数名：DictionarySort
+**输入： STUDENT stu[], char course[][N], int rank[], float sum[], int *pStudent, int *pCourse
+**stu[] --- 记录学生数据的结构体
+**iStudent --- 记录输入数据个数的整型变量
+**iCourse --- 记录课程数的整型变量iCourse
+**course[][N] --- 记录课程名字的字符型二维数组
+**rank[] --- 记录排名的整型数组
+**sum[] --- 记录学生总分的单精度数组
+**功能描述：按姓名的字典顺序排出成绩表
+**********************/
+void DictionarySort(STUDENT stu[], char course[][N], int rank[], float sum[], int iStudent, int iCourse)
+{
+    int i = 0,j = 0;
+    float temp = 0;
+
+    Rank(stu, course, rank, sum, iStudent, iCourse);
+
+    for(i = 0; i < iStudent-1; i++)
+    {
+        for(j = i+1; j < iStudent; j++)
+        {
+            if(strcmp(stu[i].name, stu[j].name) > 0)
+            {
+                Swap_STU(&stu[i], &stu[j]);
+
+                temp = rank[i];
+                rank[i] = rank[j];
+                rank[j] = temp;
+
+                temp = sum[i];
+                sum[i] = sum[j];
+                sum[j] = temp;
+            }
+        }
+    }
+
+    for(i = 0; i < iStudent; i++)
+    {
+        printf("姓名：%s，学号：%ld, 总分：%.2f，名次：%d\n", stu[i].name, stu[i].studentID, sum[i], rank[i]);
+    }
+
+    for(i = 0; i < N; i++)
+    {
+        sum[i] = 0;
+    }
+}
+
+/**********************
+**函数名：Search_Num
+**输入： STUDENT stu[], char course[][N], int rank[], float sum[], int *pStudent, int *pCourse
+**stu[] --- 记录学生数据的结构体
+**iStudent --- 记录输入数据个数的整型变量
+**iCourse --- 记录课程数的整型变量iCourse
+**course[][N] --- 记录课程名字的字符型二维数组
+**rank[] --- 记录排名的整型数组
+**sum[] --- 记录学生总分的单精度数组
+**功能描述：按学号查询学生排名及其各科考试成绩
+**********************/
+void Search_Num(STUDENT stu[], char course[][N], int rank[], float sum[], int iStudent, int iCourse)
+{
+    int i = 0, k = 0, sign = 0;
+    long temp = 0;
+
+    Rank(stu, course, rank, sum, iStudent, iCourse);
+
+    if(iStudent != 0 && iCourse != 0)
+    {
+        printf("请输入所要查询同学学号:\n");
+
+        scanf("%ld",&temp);
+
+        for(i = 0;i < iStudent; i++)       //输出学生成绩
+        {
+            if(stu[i].studentID == temp)
+            {
+                sign = 1;
+                printf("姓名：%s，学号：%ld, 总分：%.2f，名次：%d\n", stu[i].name, stu[i].studentID, sum[i], rank[i]);
+                for(k = 0; k < iCourse; k++)
+                {
+                    printf("%s：", course[k]);
+                    printf("%.2f ", stu[i].score[k]);
+
+                    if(k == iCourse-1)
+                        printf("\n");
+                }
+            }
+        }
+
+        if(sign == 0)
+            printf("查无此人\n");
+
+        while(getchar() != '\n');
+
+        for(i = 0; i < N; i++)
+        {
+            sum[i] = 0;
+        }
+    }
+}
+
+/**********************
+**函数名：Search_Name
+**输入： STUDENT stu[], char course[][N], int rank[], float sum[], int *pStudent, int *pCourse
+**stu[] --- 记录学生数据的结构体
+**iStudent --- 记录输入数据个数的整型变量
+**iCourse --- 记录课程数的整型变量iCourse
+**course[][N] --- 记录课程名字的字符型二维数组
+**rank[] --- 记录排名的整型数组
+**sum[] --- 记录学生总分的单精度数组
+**功能描述：按姓名查询学生排名及其各科考试成绩
+**********************/
+void Search_Name(STUDENT stu[], char course[][N], int rank[], float sum[], int iStudent, int iCourse)
+{
+    int i = 0, k = 0, sign = 0;
+    char temp[N];
+
+    Rank(stu, course, rank, sum, iStudent, iCourse);
+
+    if(iStudent != 0 && iCourse != 0)
+    {
+        printf("请输入所要查询同学姓名:\n");
+
+        gets(temp);
+
+        for(i = 0;i < iStudent; i++)       //输出学生成绩
+        {
+            if(strcmp(temp, stu[i].name) == 0)
+            {
+                sign = 1;
+                printf("姓名：%s，学号：%ld, 总分：%.2f，名次：%d\n", stu[i].name, stu[i].studentID, sum[i], rank[i]);
+                for(k = 0; k < iCourse; k++)
+                {
+                    printf("%s：", course[k]);
+                    printf("%.2f ", stu[i].score[k]);
+
+                    if(k == iCourse-1)
+                        printf("\n");
+                }
+            }
+        }
+
+        if(sign == 0)
+            printf("查无此人\n");
+
+        for(i = 0; i < N; i++)
+        {
+            sum[i] = 0;
+        }
+    }
+}
+
+/**********************
+**函数名：Classify
+**输入： STUDENT stu[], char course[][N], int rank[], float sum[], int *pStudent, int *pCourse
+**stu[] --- 记录学生数据的结构体
+**iStudent --- 记录输入数据个数的整型变量
+**iCourse --- 记录课程数的整型变量iCourse
+**course[][N] --- 记录课程名字的字符型二维数组
+**rank[] --- 记录排名的整型数组
+**sum[] --- 记录学生总分的单精度数组
+**功能描述：对每门课程统计不同类别的人数及其所占百分比
+**********************/
+void Classify(STUDENT stu[], char course[][N], int rank[], float sum[], int iStudent, int iCourse)
+{
+    float sign = 0, a = 0, b = 0, c = 0, d = 0, e = 0;
+    int i = 0,j = 0;
+
+    if(iStudent == 0 || iCourse == 0)      //提示用户输入数据
+    {
+        printf("请先录入学生数据!\n");
+        return ;
+    }
+
+    for(i = 0; i < iCourse; i++)       //进行统计
+    {
+        a = 0;
+        b = 0;
+        c = 0;
+        d = 0;
+        e = 0;
+
+        for(j = 0; j < iStudent; j++)
+        {
+            sign = stu[j].score[i]/10;
+
+            if(sign >= 9)
+                a++;
+            else if(sign >= 8 && sign < 9)
+                b++;
+            else if(sign >= 7 && sign < 8)
+                c++;
+            else if(sign >= 6 && sign < 7)
+                d++;
+            else
+                e++;
+        }
+
+        printf("%s\n", course[i]);
+        printf("优秀（90-100分）：%.0f人 %.2f%%\n",a,100*a/iStudent);
+        printf("良好 （80-89分）：%.0f人 %.2f%%\n",b,100*b/iStudent);
+        printf("中等 （70-79分）：%.0f人 %.2f%%\n",c,100*c/iStudent);
+        printf("及格 （60-69分）：%.0f人 %.2f%%\n",d,100*d/iStudent);
+        printf("不及格（0-59分）：%.0f人 %.2f%%\n",e,100*e/iStudent);
+        printf("\n");
+    }
+}
+
+/**********************
+**函数名：PrintScore
+**输入： STUDENT stu[], char course[][N], int rank[], float sum[], int *pStudent, int *pCourse
+**stu[] --- 记录学生数据的结构体
+**iStudent --- 记录输入数据个数的整型变量
+**iCourse --- 记录课程数的整型变量iCourse
+**course[][N] --- 记录课程名字的字符型二维数组
+**rank[] --- 记录排名的整型数组
+**sum[] --- 记录学生总分的单精度数组
+**功能描述：输出每个学生的学号、姓名、考试成绩以及课程总分和平均分
+**********************/
+void PrintScore(STUDENT stu[], char course[][N], int rank[], float sum[], int iStudent, int iCourse)
+{
+    int i = 0, k = 0;
+
+    Rank(stu, course, rank, sum, iStudent, iCourse);
+
+    for(i = 0; i < iStudent; i++)
+    {
+        printf("姓名：%s，学号：%ld, 总分：%.2f，名次：%d\n", stu[i].name, stu[i].studentID, sum[i], rank[i]);
+        for(k = 0; k < iCourse; k++)
+        {
+            printf("%s：", course[k]);
+            printf("%.2f ", stu[i].score[k]);
+
+            if(k == iCourse-1)
+                printf("\n");
+        }
+        printf("\n");
+    }
+
+    for(i = 0; i < N; i++)
+    {
+        sum[i] = 0;
+    }
+}
+
+/**********************
+**函数名：Rank
+**输入： STUDENT stu[], char course[][N], int rank[], float sum[], int *pStudent, int *pCourse
+**stu[] --- 记录学生数据的结构体
+**iStudent --- 记录输入数据个数的整型变量
+**iCourse --- 记录课程数的整型变量iCourse
+**course[][N] --- 记录课程名字的字符型二维数组
+**rank[] --- 记录排名的整型数组
+**sum[] --- 记录学生总分的单精度数组
+**功能描述：实现降序排序
+**********************/
+void Rank(STUDENT stu[], char course[][N], int rank[], float sum[], int iStudent, int iCourse)
+{
+    int i = 0, j = 0;
+    float temp = 0;
+
+    if(iStudent == 0 || iCourse == 0)      //没有数据时，提醒用户输入数据
+    {
+        printf("请先录入学生数据!\n");
+        return ;
+    }
+
+    for(i = 0; i < N ;i++)      //对排名初始化
+    {
+        rank[i] = i+1;
+    }
+
+    for(i = 0; i < iStudent; i++)
+    {
+        for(j = 0; j < iCourse; j++)
+        {
+             sum[i] += stu[i].score[j];
+        }
+    }
+
+    for(i = 0; i < iStudent-1; i++)        //实现排序
+    {
+        for(j = i+1; j < iStudent; j++)
+        {
+            if(sum[i] < sum[j])
+            {
+               Swap_STU(&stu[i], &stu[j]);
+
+               temp = sum[i];
+               sum[i] = sum[j];
+               sum[j] = temp;
+            }
+        }
+    }
+}
+
+/**********************
+**函数名：Swap_STU
+**功能描述：交换两个STUDENT型结构体
+**********************/
+void Swap_STU(STUDENT *x, STUDENT *y)
+{
+    STUDENT temp;
+
+    temp = *x;
+    *x = *y;
+    *y = temp;
+}
